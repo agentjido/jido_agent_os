@@ -4,7 +4,7 @@
 separate:
 
 - Phoenix context: the public application API
-- AgentOS pod: the internal durable runtime
+- agent runtime subsystem: the internal durable runtime
 
 The Phoenix context should own domain verbs such as `submit_task`,
 `queue_review`, or `answer_question`. The AgentOS pod should own runtime
@@ -13,8 +13,18 @@ topology, durable member agents, and signal routing.
 ## Recommended Layout
 
 ```text
-lib/my_app/
-  agent_os.ex
+lib/
+  my_app.ex
+  my_app/
+    coding_workspace.ex
+    coding_workspace/
+      runtime.ex
+      prompts.ex
+      summary.ex
+  my_app_web.ex
+  my_app_web/
+    ...
+  my_app_agents.ex
   my_app_agents/
     pods/
       coding_pod.ex
@@ -22,20 +32,19 @@ lib/my_app/
       planner.ex
       coder.ex
       reviewer.ex
-  coding_workspace.ex
-  coding_workspace/
-    runtime.ex
-    prompts.ex
-    summary.ex
 ```
+
+This layout intentionally mirrors Phoenix's own split between `MyApp` and
+`MyAppWeb`. `MyAppAgents` is a third peer subsystem that owns the durable
+runtime.
 
 ## Responsibilities
 
-- `MyApp.AgentOS`
-  Host-supervised kernel wrapper.
-- `MyApp.AgentOS.Pods.*`
+- `MyAppAgents`
+  Host-supervised runtime root built on `Jido.AgentOS`.
+- `MyAppAgents.Pods.*`
   Durable pod topology definitions.
-- `MyApp.AgentOS.Agents.*`
+- `MyAppAgents.Agents.*`
   Durable member agents that live inside a pod.
 - `MyApp.CodingWorkspace`
   Public Phoenix context called by controllers, LiveViews, jobs, and tests.
@@ -69,3 +78,12 @@ Because the context is product code, not kernel code.
 `Jido.AgentOS` should stay generic: kernel lifecycle, persistence, snapshots,
 and pod helpers. The Phoenix context knows your repo, your prompts, your task
 verbs, and your UI/API needs. That belongs in the host application.
+
+## Why Use A Sibling Root Like `MyAppAgents`?
+
+Because it makes the runtime boundary visible.
+
+`MyAppAgents` says "this is a peer subsystem in the Phoenix app" rather than
+"this is just another nested namespace under the app context tree." That is
+useful when the runtime is substantial enough to deserve its own ownership
+boundary, but not large enough to extract into a separate OTP application yet.

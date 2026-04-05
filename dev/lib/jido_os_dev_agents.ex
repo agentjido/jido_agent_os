@@ -1,10 +1,19 @@
 defmodule JidoOSDevAgents do
   @moduledoc """
-  Public AgentOS wrapper for the Phoenix dev host.
+  Durable agent runtime subsystem for the Phoenix dev host.
 
-  This is the one module a host application would normally supervise and call.
-  The dev app runs a durable internal `RepoPod` around one local Git checkout
-  and exposes that runtime through `JidoOSDev.RepoWorkspace`.
+  This root sits beside `JidoOSDev` and `JidoOSDevWeb` as a peer subsystem,
+  much like Phoenix treats `MyAppWeb` as distinct from `MyApp`.
+
+  It owns the internal runtime boundary for the example app:
+
+  - the `Jido.AgentOS` kernel wrapper
+  - durable pod definitions
+  - member agents
+  - signal-driven actions
+
+  Phoenix transport and contexts do not call pods and agents directly. They go
+  through `JidoOSDev.RepoWorkspace`, which uses this subsystem internally.
   """
 
   use Jido.AgentOS,

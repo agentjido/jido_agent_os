@@ -67,7 +67,7 @@ model.
 
 In a Phoenix app:
 
-- `MyApp.AgentOS` is the kernel boundary
+- a sibling runtime namespace such as `MyAppAgents` can own the durable agent backend
 - pods are the long-lived multi-agent backend
 - controllers and LiveViews should usually talk to a domain service or context
   backed by a pod, not to raw pod mechanics directly
@@ -76,24 +76,31 @@ That means product routes should generally express domain verbs such as
 `submit_task`, `task_status`, or `scale_workers`, while the pod handles the
 internal multi-agent coordination behind that boundary. The public app-facing
 module can be `MyApp.CodingWorkspace` or `MyApp.SupportDesk`, while the durable
-runtime topology underneath remains a pod.
+runtime topology underneath remains a pod. This peer-subsystem layout makes the
+runtime feel more like `MyAppWeb`: distinct from app contexts, but still part
+of the same Phoenix application.
 
 A practical Phoenix layout looks like:
 
 ```text
-lib/my_app/
-  agent_os.ex
+lib/
+  my_app.ex
+  my_app/
+    coding_workspace.ex
+    coding_workspace/
+      runtime.ex
+      prompts.ex
+      summary.ex
+  my_app_web.ex
+  my_app_web/
+    ...
+  my_app_agents.ex
   my_app_agents/
     pods/
       coding_pod.ex
     agents/
       planner.ex
       worker.ex
-  coding_workspace.ex
-  coding_workspace/
-    runtime.ex
-    prompts.ex
-    summary.ex
 ```
 
 That keeps the public Phoenix context separate from the internal AgentOS
@@ -210,6 +217,7 @@ long-lived coding workspace for a local Git checkout.
 
 The repo layout follows the same pattern:
 
+- `dev/lib/jido_os_dev_agents.ex`: runtime root module
 - `dev/lib/jido_os_dev_agents/`: internal durable runtime definitions
 - `dev/lib/jido_os_dev/repo_workspace.ex`: public Phoenix context
 - `dev/lib/jido_os_dev/repo_workspace/`: context internals

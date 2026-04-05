@@ -10,12 +10,12 @@ defmodule JidoOSDev.RepoWorkspace do
 
   - `JidoOSDev.RepoWorkspace`: public Phoenix context
   - `JidoOSDev.RepoWorkspace.*`: private context internals
-  - `JidoOSDevAgents.*`: internal durable runtime topology
+  - `JidoOSDevAgents.*`: sibling runtime subsystem
 
   That split keeps the host app Phoenix-native. Controllers and LiveViews call
-  the context, while the context reaches into `Jido.AgentOS` on their behalf.
-  End developers should not need to coordinate nodes, prompts, or signals from
-  transport code.
+  the context, while the context reaches into `JidoOSDevAgents` on their
+  behalf. End developers should not need to coordinate nodes, prompts, or
+  signals from transport code.
   """
 
   alias __MODULE__.{Config, Runtime, Workflow}

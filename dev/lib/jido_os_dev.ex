@@ -2,13 +2,13 @@ defmodule JidoOSDev do
   @moduledoc """
   Reference Phoenix host for `Jido.AgentOS`.
 
-  This app keeps the canonical host boundary small:
+  This app uses three top-level peer namespaces:
 
-  - `JidoOSDevAgents` is the kernel wrapper the app supervises.
-  - `JidoOSDevAgents.*` holds the internal durable runtime topology.
-  - `JidoOSDev.RepoWorkspace` is the Phoenix context backed by that runtime.
-  - `JidoOSDev.RepoWorkspace.*` holds the context's internal orchestration modules.
-  - `JidoOSDev.RepoCheckout` is the local Git checkout adapter.
-  - `JidoOSDev.ObservabilityLog` is host-level observability glue for the demo UI.
+  - `JidoOSDev`: contexts, adapters, and application-facing code
+  - `JidoOSDevWeb`: HTTP and LiveView transport
+  - `JidoOSDevAgents`: durable agent runtime built on `Jido.AgentOS`
+
+  The public application boundary stays in `JidoOSDev.RepoWorkspace`. The
+  runtime boundary stays in `JidoOSDevAgents`.
   """
 end
