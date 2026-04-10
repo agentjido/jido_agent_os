@@ -22,6 +22,7 @@ defmodule Jido.AgentOS.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
+      {:spark, "~> 2.6.1"},
       {:jido, github: "agentjido/jido", branch: "main", override: true},
       {:jido_ai, github: "agentjido/jido_ai", branch: "main"}
     ]

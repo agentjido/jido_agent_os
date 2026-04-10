@@ -18,63 +18,46 @@ defmodule JidoOSDev.RepoWorkspace do
   signals from transport code.
   """
 
+  use Jido.Domain
+
   alias __MODULE__.{Config, Runtime, Workflow}
+  alias JidoOSDevAgents.Pods.RepoPod
 
-  @spec kernel_status() :: map()
-  defdelegate kernel_status(), to: Config
-
-  @spec configured_pod() :: map() | nil
-  defdelegate configured_pod(), to: Config
-
-  @spec ai_ready?() :: boolean()
-  defdelegate ai_ready?(), to: Config
-
-  @spec list_pods() :: [String.t()]
-  defdelegate list_pods(), to: Config
-
-  @spec default_repo_path() :: String.t()
-  defdelegate default_repo_path(), to: Config
-
-  @spec default_pod_id() :: String.t()
-  defdelegate default_pod_id(), to: Config
-
-  @spec ensure_pod(String.t(), String.t()) :: {:ok, pid()} | {:error, term()}
-  def ensure_pod(pod_id, repo_path \\ Config.default_repo_path()) do
-    Runtime.ensure_pod(pod_id, repo_path)
+  domain do
+    name(:repo_workspace)
+    kernel(JidoOSDevAgents)
+    pod(RepoPod)
   end
 
-  @spec pod_overview(String.t()) :: {:ok, map()} | {:error, term()}
-  defdelegate pod_overview(pod_id), to: Runtime
-
-  @spec sync_repo(String.t(), String.t()) :: {:ok, map()} | {:error, term()}
-  def sync_repo(pod_id, repo_path \\ Config.default_repo_path()) do
-    Runtime.sync_repo(pod_id, repo_path)
+  queries do
+    query(:kernel_status, delegate_to: Config)
+    query(:configured_pod, delegate_to: Config)
+    query(:ai_ready?, delegate_to: Config)
+    query(:list_pods, delegate_to: Config)
+    query(:default_repo_path, delegate_to: Config)
+    query(:default_pod_id, delegate_to: Config)
+    query(:pod_overview, args: [:pod_id], delegate_to: Runtime)
   end
 
-  @spec add_task(String.t(), String.t(), String.t()) :: {:ok, map()} | {:error, term()}
-  defdelegate add_task(pod_id, title, goal), to: Runtime
+  commands do
+    command(:ensure_pod, args: [:pod_id, :repo_path], delegate_to: Runtime)
+    command(:sync_repo, args: [:pod_id, :repo_path], delegate_to: Runtime)
+    command(:add_task, args: [:pod_id, :title, :goal], delegate_to: Runtime)
+    command(:select_task, args: [:pod_id, :task_id], delegate_to: Runtime)
+    command(:plan_task, args: [:pod_id, :task_id], delegate_to: Workflow)
+    command(:draft_task, args: [:pod_id, :task_id], delegate_to: Workflow)
+    command(:review_task, args: [:pod_id, :task_id], delegate_to: Workflow)
+    command(:chat_with_pod, args: [:pod_id, :prompt], delegate_to: Workflow)
+    command(:run_workflow, args: [:pod_id, :task_id], delegate_to: Workflow)
+    command(:reconcile_pod, args: [:pod_id], delegate_to: Runtime)
+    command(:wake_specialist, args: [:pod_id, :specialist], delegate_to: Runtime)
+  end
 
-  @spec select_task(String.t(), String.t()) :: {:ok, map()} | {:error, term()}
-  defdelegate select_task(pod_id, task_id), to: Runtime
+  @doc "Ensures a repo workspace pod using the configured default repo path."
+  @spec ensure_pod(String.t()) :: {:ok, pid()} | {:error, term()}
+  def ensure_pod(pod_id), do: ensure_pod(pod_id, Config.default_repo_path())
 
-  @spec plan_task(String.t(), String.t()) :: {:ok, String.t()} | {:error, term()}
-  defdelegate plan_task(pod_id, task_id), to: Workflow
-
-  @spec draft_task(String.t(), String.t()) :: {:ok, String.t()} | {:error, term()}
-  defdelegate draft_task(pod_id, task_id), to: Workflow
-
-  @spec review_task(String.t(), String.t()) :: {:ok, String.t()} | {:error, term()}
-  defdelegate review_task(pod_id, task_id), to: Workflow
-
-  @spec chat_with_pod(String.t(), String.t()) :: {:ok, map()} | {:error, term()}
-  defdelegate chat_with_pod(pod_id, prompt), to: Workflow
-
-  @spec run_workflow(String.t(), String.t()) :: {:ok, map()} | {:error, term()}
-  defdelegate run_workflow(pod_id, task_id), to: Workflow
-
-  @spec reconcile_pod(String.t()) :: {:ok, map()} | {:error, term()}
-  defdelegate reconcile_pod(pod_id), to: Runtime
-
-  @spec wake_specialist(String.t(), atom()) :: {:ok, pid()} | {:error, term()}
-  defdelegate wake_specialist(pod_id, specialist), to: Runtime
+  @doc "Syncs a repo workspace using the configured default repo path."
+  @spec sync_repo(String.t()) :: {:ok, map()} | {:error, term()}
+  def sync_repo(pod_id), do: sync_repo(pod_id, Config.default_repo_path())
 end

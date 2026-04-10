@@ -1,5 +1,30 @@
 # Jido.AgentOS
 
+## READ THIS FIRST
+
+> `jido_agent_os` is currently an IDEA and an exploratory SPIKE.
+>
+> It is not stable.
+>
+> It is not settled.
+>
+> It may be heavily rewritten, renamed, restructured, or completely discarded.
+>
+> Do not treat the current code, API, module layout, or documentation as a
+> committed long-term direction.
+>
+> This repo is being opened early to share the exploration in public, not to
+> announce a finished or supported package.
+>
+> NO GitHub Issues are being accepted yet.
+>
+> NO GitHub Pull Requests are being accepted yet.
+>
+> Please do not open Issues or PRs for `jido_agent_os` at this stage.
+>
+> If you want to discuss the idea, use Discord's `#jido` channel only:
+> [https://jido.run/discord](https://jido.run/discord)
+
 `jido_agent_os` is an OTP-native kernel for running durable Jido pods inside a
 host application such as Phoenix.
 
