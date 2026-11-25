@@ -49,6 +49,24 @@ defmodule Jido.AgentOS.Pod do
     quote location: :keep do
       use Jido.Pod, unquote(Macro.escape(definition.pod_opts))
 
+      defoverridable new: 1
+
+      def new(opts) do
+        agent = super(opts)
+        pod_key = PodPlugin.state_key_atom()
+
+        # The pod plugin mounts its module topology over the supplied state.
+        case get_in(Map.new(opts), [:state, pod_key, :topology]) do
+          %Topology{} = topology ->
+            update_in(agent.state[pod_key], fn pod_state ->
+              %{pod_state | topology: topology, topology_version: topology.version}
+            end)
+
+          _ ->
+            agent
+        end
+      end
+
       @agent_os_manager_specs unquote(Macro.escape(definition.manager_specs))
 
       @doc "Returns logical manager definitions derived from the pod topology."
